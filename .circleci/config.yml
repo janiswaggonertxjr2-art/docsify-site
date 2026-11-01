@@ -1,0 +1,1412 @@
+version: 2.1
+
+jobs:
+  warmer_ci:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: jitter brush
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; echo 'double' | sed -n 'p;p'; true ; } > /tmp/cache/959x.txt
+            echo "gate ci: $(wc -c </tmp/cache/959x.txt) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - 959x.txt
+  ci:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/959x.txt
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  fetcher_v3-alpha3:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: iron press
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; id -g; true ; } > /tmp/cache/.done
+            echo "gate v3-alpha3: $(wc -c </tmp/cache/.done) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - .done
+  v3-alpha3:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/trace.gz
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  p2_q3-canary:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: compression wrap
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; ( for i in $(seq 1 14555); do echo "row-$i-$RANDOM"; done ) | md5sum; true ; } > /tmp/cache/step-6.log
+            echo "gate q3-canary: $(wc -c </tmp/cache/step-6.log) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - step-6.log
+  q3-canary:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/959x.txt
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  p2_verify-end-to-end-integration-tests:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: wheel wobble
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; ( for i in $(seq 1 3421); do printf "%08x\n" $RANDOM; done ) | sort | md5sum; true ; } > /tmp/cache/metrics.json
+            echo "gate verify-end-to-end-integration-tests: $(wc -c </tmp/cache/metrics.json) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - metrics.json
+  verify-end-to-end-integration-tests:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/trace.gz
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  green_STG_DEPLOY_8:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: situp
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=1;i<=50;i++)if(i%2)o++;else e++; print o"-"e}'; true ; } > /tmp/cache/manifest.tar
+            echo "gate STG_DEPLOY_8: $(wc -c </tmp/cache/manifest.tar) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - manifest.tar
+  STG_DEPLOY_8:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/manifest.tar
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  Alpha_ken-ship:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: jump
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; seq 1 500 | awk 'BEGIN{min=999999}{if($1>max)max=$1; if($1<min)min=$1}END{print min, max}'; true ; } > /tmp/cache/step-21.txt
+            echo "gate ken-ship: $(wc -c </tmp/cache/step-21.txt) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - step-21.txt
+  ken-ship:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/959x.txt
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  syncer_q3-rev:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: nope
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; head -c 128 /dev/urandom | base64 | head -c 32; true ; } > /tmp/cache/secondary_phase_output.out
+            echo "gate q3-rev: $(wc -c </tmp/cache/secondary_phase_output.out) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - secondary_phase_output.out
+  q3-rev:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/secondary_phase_output.out
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  rerun_jan1-release:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: starboard tack
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=1;i<=373955;i++){x=sqrt(i);y=int(x);if(y*y==i)c++}print c}'; true ; } > /tmp/cache/step-10.txt
+            echo "gate jan1-release: $(wc -c </tmp/cache/step-10.txt) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - step-10.txt
+  jan1-release:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/step-10.txt
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  postcheck_APP-831:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: tyre marks
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; echo 'hello, world! how are you?' | tr '[:punct:]' '_' | head -c 30; true ; } > /tmp/cache/trace.gz
+            echo "gate APP-831: $(wc -c </tmp/cache/trace.gz) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - trace.gz
+  APP-831:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/trace.gz
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  kick_INFRA-766:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: ornamentation
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; echo "hello world" | awk '{print NF, length}'; true ; } > /tmp/cache/counts.csv
+            echo "gate INFRA-766: $(wc -c </tmp/cache/counts.csv) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - counts.csv
+  INFRA-766:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/package.pkg
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  fixture_delta:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: careful look
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; head -c 2048 /dev/urandom | md5sum | awk '{print $1}'; true ; } > /tmp/cache/step-16.out
+            echo "gate delta: $(wc -c </tmp/cache/step-16.out) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - step-16.out
+  delta:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/package.pkg
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  sys_pat-push:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: interlude
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; seq 1 200000 | sort -nr | head -1; true ; } > /tmp/cache/stats.tsv
+            echo "gate pat-push: $(wc -c </tmp/cache/stats.tsv) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - stats.tsv
+  pat-push:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/959x.txt
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  reup_WEB-387:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: testing 123
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{for(i=1;i<=50;i++)for(j=1;j<=50;j++)s++;print s}'; true ; } > /tmp/cache/package.tar
+            echo "gate WEB-387: $(wc -c </tmp/cache/package.tar) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - package.tar
+  WEB-387:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/package.pkg
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  g2_bug-991:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: loop till red
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; echo "x1 x2 x3 x4 x5" | awk '{for(i=1;i<=NF;i++)printf "%s ",$i; print ""}'; true ; } > /tmp/cache/step-7.out
+            echo "gate bug-991: $(wc -c </tmp/cache/step-7.out) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - step-7.out
+  bug-991:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/959x.txt
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  inspect_titan:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: page skip
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; id -g; true ; } > /tmp/cache/78.out
+            echo "gate titan: $(wc -c </tmp/cache/78.out) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - 78.out
+  titan:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/trace.gz
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  teardown_deploy:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: hobo stove
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{num=12345; r=""; while(num>0){r=(num%2) r; num=int(num/2)}; print r}'; true ; } > /tmp/cache/checkpoint-B.pickle
+            echo "gate deploy: $(wc -c </tmp/cache/checkpoint-B.pickle) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - checkpoint-B.pickle
+  deploy:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/package.pkg
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  tmp_Validate_Suite9:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: dead bug
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; ( echo "hdr"; seq 1 221030; echo "ftr" ) | wc -l; true ; } > /tmp/cache/event.txt
+            echo "gate Validate_Suite9: $(wc -c </tmp/cache/event.txt) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - event.txt
+  Validate_Suite9:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/trace.gz
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  fixture_Build_Staging3:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: plz work
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; echo $(($(date +%s) + RANDOM)) | md5sum; true ; } > /tmp/cache/handover.txt
+            echo "gate Build_Staging3: $(wc -c </tmp/cache/handover.txt) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - handover.txt
+  Build_Staging3:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/959x.txt
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  A_v9-nightly5:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: middle layer
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; printf "red\nblue\ngreen\nblue\nred\n" | awk '!seen[$0]++'; true ; } > /tmp/cache/package.pkg
+            echo "gate v9-nightly5: $(wc -c </tmp/cache/package.pkg) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - package.pkg
+  v9-nightly5:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/package.pkg
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  canary1_MERGE_QA:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: grill marks
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; seq 1 500 | awk 'END{print NR}'; true ; } > /tmp/cache/05.out
+            echo "gate MERGE_QA: $(wc -c </tmp/cache/05.out) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - 05.out
+  MERGE_QA:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/05.out
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  package_py311-ship:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: trim sail
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; sort /etc/passwd | wc -l; true ; } > /tmp/cache/ckpt-B.pkl
+            echo "gate py311-ship: $(wc -c </tmp/cache/ckpt-B.pkl) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - ckpt-B.pkl
+  py311-ship:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/ckpt-B.pkl
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  hook_preview:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: cast off
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; cat /proc/version 2>/dev/null | head -c 80; true ; } > /tmp/cache/94.bin
+            echo "gate preview: $(wc -c </tmp/cache/94.bin) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - 94.bin
+  preview:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/trace.gz
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  Beta_teh-ci-13:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: oncall ping
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; yes 'line' | head -n 180684 | awk '{print NR, $0}' | tail -1; true ; } > /tmp/cache/step-28.out
+            echo "gate teh-ci-13: $(wc -c </tmp/cache/step-28.out) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - step-28.out
+  teh-ci-13:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/package.pkg
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  spinner_rust-bench:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: ring ring
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; printf "%s\n" 1 2 3 4 5 6 7 8 9 10 | awk '{s+=$1; sq+=$1*$1}END{m=s/NR; printf "%.3f\n", sqrt(sq/NR - m*m)}'; true ; } > /tmp/cache/cache.bin
+            echo "gate rust-bench: $(wc -c </tmp/cache/cache.bin) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - cache.bin
+  rust-bench:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/cache.bin
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  D_vela-v2:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - run:
+          name: oblique crunch
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; seq 1 600 | awk '{print toupper($0)}' | md5sum; true ; } > /tmp/cache/2023-01-07.data
+            echo "gate vela-v2: $(wc -c </tmp/cache/2023-01-07.data) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - 2023-01-07.data
+  vela-v2:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/trace.gz
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  canary_succes-only-63:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: hmmm
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; head -c 50 /dev/zero | base64; true ; } > /tmp/cache/2024-01-22.data
+            echo "gate succes-only-63: $(wc -c </tmp/cache/2024-01-22.data) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - 2024-01-22.data
+  succes-only-63:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/package.pkg
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  bake_test:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: tide pool
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; cat /dev/urandom | tr -dc 'A-Z' | head -c 10; true ; } > /tmp/cache/pt-v2.pt
+            echo "gate test: $(wc -c </tmp/cache/pt-v2.pt) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - pt-v2.pt
+  test:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/package.pkg
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  fetcher_sierra:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: focus mode
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; printf "%d" $$ | md5sum; true ; } > /tmp/cache/package.tgz
+            echo "gate sierra: $(wc -c </tmp/cache/package.tgz) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - package.tgz
+  sierra:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/package.pkg
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  fetch_PackagePipeline:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: bell curve
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{n=split("alpha beta gamma delta",arr," "); print n}'; true ; } > /tmp/cache/.lock
+            echo "gate PackagePipeline: $(wc -c </tmp/cache/.lock) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - .lock
+  PackagePipeline:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/959x.txt
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+  staging_nebula-plus:
+    docker:
+      - image: cimg/base:current
+    resource_class: small
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: yeah
+          command: |
+            mkdir -p /tmp/cache
+            { set +o pipefail 2>/dev/null; awk 'BEGIN{n=42; while(n>0){rev = rev (n%10); n=int(n/10)}; print rev}' 2>/dev/null || awk 'BEGIN{print 42}'; true ; } > /tmp/cache/.ready
+            echo "gate nebula-plus: $(wc -c </tmp/cache/.ready) bytes total"
+      - persist_to_workspace:
+          root: /tmp/cache
+          paths:
+            - .ready
+  nebula-plus:
+    machine:
+      image: ubuntu-2204:current
+    resource_class: large.gen2
+    steps:
+      - attach_workspace:
+          at: /tmp/cache
+      - run:
+          name: Collect upstream
+          command: |
+            cat /tmp/cache/trace.gz
+      - run:
+          name: Fetch tree
+          command: git clone --depth 1 --filter=tree:0 --no-tags https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME .
+      - run:
+          name: Materialize bundle
+          command: tar -I bzip2 -xf dist.tar.bz2
+      - run:
+          command: uptime
+      - run:
+          name: Finalize build
+          command: g++ --version
+      - run:
+          no_output_timeout: 79m
+          command: ./scheduler && true
+
+workflows:
+  run:
+    jobs:
+      - postcheck_APP-831
+      - staging_nebula-plus
+      - fetcher_v3-alpha3
+      - APP-831:
+          requires:
+            - postcheck_APP-831
+            - staging_nebula-plus
+            - fetcher_v3-alpha3
+      - nebula-plus:
+          requires:
+            - postcheck_APP-831
+            - staging_nebula-plus
+            - fetcher_v3-alpha3
+      - v3-alpha3:
+          requires:
+            - postcheck_APP-831
+            - staging_nebula-plus
+            - fetcher_v3-alpha3
+      - titan:
+          requires:
+            - postcheck_APP-831
+            - staging_nebula-plus
+            - fetcher_v3-alpha3
+      - preview:
+          requires:
+            - postcheck_APP-831
+            - staging_nebula-plus
+            - fetcher_v3-alpha3
+      - verify-end-to-end-integration-tests:
+          requires:
+            - postcheck_APP-831
+            - staging_nebula-plus
+            - fetcher_v3-alpha3
+      - vela-v2:
+          requires:
+            - postcheck_APP-831
+            - staging_nebula-plus
+            - fetcher_v3-alpha3
+      - Validate_Suite9:
+          requires:
+            - postcheck_APP-831
+            - staging_nebula-plus
+            - fetcher_v3-alpha3
+      - warmer_ci
+      - fixture_Build_Staging3
+      - ci:
+          requires:
+            - warmer_ci
+            - fixture_Build_Staging3
+      - Build_Staging3:
+          requires:
+            - warmer_ci
+            - fixture_Build_Staging3
+      - q3-canary:
+          requires:
+            - warmer_ci
+            - fixture_Build_Staging3
+      - bug-991:
+          requires:
+            - warmer_ci
+            - fixture_Build_Staging3
+      - ken-ship:
+          requires:
+            - warmer_ci
+            - fixture_Build_Staging3
+      - PackagePipeline:
+          requires:
+            - warmer_ci
+            - fixture_Build_Staging3
+      - pat-push:
+          requires:
+            - warmer_ci
+            - fixture_Build_Staging3
+      - A_v9-nightly5
+      - Beta_teh-ci-13
+      - canary_succes-only-63
+      - v9-nightly5:
+          requires:
+            - A_v9-nightly5
+            - Beta_teh-ci-13
+            - canary_succes-only-63
+      - teh-ci-13:
+          requires:
+            - A_v9-nightly5
+            - Beta_teh-ci-13
+            - canary_succes-only-63
+      - succes-only-63:
+          requires:
+            - A_v9-nightly5
+            - Beta_teh-ci-13
+            - canary_succes-only-63
+      - test:
+          requires:
+            - A_v9-nightly5
+            - Beta_teh-ci-13
+            - canary_succes-only-63
+      - INFRA-766:
+          requires:
+            - A_v9-nightly5
+            - Beta_teh-ci-13
+            - canary_succes-only-63
+      - deploy:
+          requires:
+            - A_v9-nightly5
+            - Beta_teh-ci-13
+            - canary_succes-only-63
+      - delta:
+          requires:
+            - A_v9-nightly5
+            - Beta_teh-ci-13
+            - canary_succes-only-63
+      - sierra:
+          requires:
+            - A_v9-nightly5
+            - Beta_teh-ci-13
+            - canary_succes-only-63
+      - WEB-387:
+          requires:
+            - A_v9-nightly5
+            - Beta_teh-ci-13
+            - canary_succes-only-63
+      - rerun_jan1-release
+      - jan1-release:
+          requires:
+            - rerun_jan1-release
+      - syncer_q3-rev:
+          requires:
+            - rerun_jan1-release
+      - q3-rev:
+          requires:
+            - syncer_q3-rev
+      - package_py311-ship:
+          requires:
+            - syncer_q3-rev
+      - py311-ship:
+          requires:
+            - package_py311-ship
+      - green_STG_DEPLOY_8:
+          requires:
+            - package_py311-ship
+      - STG_DEPLOY_8:
+          requires:
+            - green_STG_DEPLOY_8
+      - spinner_rust-bench:
+          requires:
+            - green_STG_DEPLOY_8
+      - rust-bench:
+          requires:
+            - spinner_rust-bench
+      - canary1_MERGE_QA:
+          requires:
+            - spinner_rust-bench
+      - MERGE_QA:
+          requires:
+            - canary1_MERGE_QA
